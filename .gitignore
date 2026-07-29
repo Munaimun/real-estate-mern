@@ -1,22 +1,21 @@
-# dependencies
+# Dependencies
 node_modules/
 
-# env
+# Build files
+dist/
+build/
+
+# Environment variables
 .env
 .env.*
 
-# logs
-logs
+# Logs
 *.log
 
-# build
-dist
-build
-
-# editor
+# Editor files
 .vscode/
 .idea/
 
-# OS
+# OS files
 .DS_Store
 Thumbs.db
