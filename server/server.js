@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 
 import userRouter from "./routes/user.route.js";
+import authRouter from "./routes/auth.route.js";
 
 dotenv.config();
 
@@ -16,11 +17,14 @@ mongoose
   });
 
 const app = express();
+app.use(express.json()); // Middleware to parse JSON request bodies
+
 const PORT = 5000;
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-// get method
+// routes
 app.use("/api/user", userRouter);
+app.use("/api/auth", authRouter); // signup route
