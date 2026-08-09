@@ -27,7 +27,7 @@ app.listen(PORT, () => {
 
 // routes
 app.use("/api/user", userRouter);
-app.use("/api/auth", authRouter); // signup route
+app.use("/api/auth", authRouter);
 
 // middleware
 app.use((err, req, res, next) => {
