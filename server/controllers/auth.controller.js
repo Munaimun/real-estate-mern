@@ -9,12 +9,15 @@ export const signup = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
 
+    // Validate the input fields
     if (!username || !email || !password) {
       return res.status(400).json({
+        success: false,
         message: "Username, email and password are required",
       });
     }
 
+    // hash the password before saving it to the database
     const hashedPassword = bcrypt.hashSync(password, 10);
 
     const newUser = new User({
@@ -26,6 +29,7 @@ export const signup = async (req, res, next) => {
     await newUser.save();
 
     res.status(201).json({
+      success: true,
       message: "User created successfully",
     });
   } catch (error) {
