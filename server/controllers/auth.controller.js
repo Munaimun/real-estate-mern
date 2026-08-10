@@ -13,7 +13,7 @@ export const signup = async (req, res, next) => {
     if (!username || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Username, email and password are required",
+        message: "Every field is required",
       });
     }
 
@@ -41,6 +41,13 @@ export const signup = async (req, res, next) => {
 export const signin = async (req, res, next) => {
   const { email, password } = req.body;
   try {
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
+    }
+
     // Check if the user exists
     const validUser = await User.findOne({ email });
     if (!validUser) return next(errorHandler(404, "User not found"));
