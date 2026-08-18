@@ -1,12 +1,20 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from "../redux/user/userSlice.js";
 
 const SignIn = () => {
   const [formtData, setFormData] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const { loading, err } = useSelector((state) => state.user); // Get the loading and error state from Redux.
 
   const navigate = useNavigate();
+
+  const dispatch = useDispatch();
 
   // Updates form data when an input changes.
   const handleChange = (e) => {
@@ -21,7 +29,7 @@ const SignIn = () => {
     e.preventDefault(); // to prevent the page from refreshing
 
     try {
-      setLoading(true); // Set loading to true when the form is submitted.
+      dispatch(signInStart()); // Start the sign-in process.
 
       // Send the form data to the signin API.
       const res = await fetch("/api/auth/signin", {
@@ -35,17 +43,14 @@ const SignIn = () => {
       const data = await res.json(); // Convert the response from the server into JSON.
 
       if (data.success === false) {
-        setLoading(false); // Set loading to false since the request is complete.
-        setError(data.message); // If the signin failed, set the error message.
+        dispatch(signInFailure(data.message)); // If the server says signin failed, dispatch the failure action with the error message.
         return;
       }
 
-      setLoading(false); // Set loading to false since the request is complete.
-      setError(null);
+      dispatch(signInSuccess(data)); // If signin is successful, dispatch the success action with the user data.
       navigate("/"); // Redirect the user to the home page after successful signin.
     } catch (err) {
-      setLoading(false); // Set loading to false since the request is complete.
-      setError(err.message);
+      dispatch(signInFailure(err.message)); // If there's a network error or other issue, dispatch the failure action with a generic error message.
     }
   };
 
@@ -81,7 +86,7 @@ const SignIn = () => {
           <span className="text-blue-700">Sign up</span>
         </Link>
       </div>
-      {error && <p className="text-red-500 mt-5">{error}</p>}
+      {err && <p className="text-red-500 mt-5">{err}</p>}
     </div>
   );
 };
