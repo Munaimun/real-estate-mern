@@ -77,6 +77,11 @@ export const google = async (req, res, next) => {
 
     // If the user already exists, log them in.
     if (user) {
+      if (req.body.photo && user.photo !== req.body.photo) {
+        user.photo = req.body.photo;
+        await user.save();
+      }
+
       // Create a JWT token using the user's ID.
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
@@ -109,7 +114,7 @@ export const google = async (req, res, next) => {
         password: hashedPassword,
 
         // Save the user's Google profile picture.
-        image: req.body.photo,
+        photo: req.body.photo,
       });
 
       // Save the new user in MongoDB.
