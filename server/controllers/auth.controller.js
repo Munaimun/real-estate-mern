@@ -68,3 +68,67 @@ export const signin = async (req, res, next) => {
     next(err);
   }
 };
+
+// Handle Google OAuth login
+export const google = async (req, res, next) => {
+  try {
+    // Find a user with the email received from Google.
+    const user = await User.findOne({ email: req.body.email });
+
+    // If the user already exists, log them in.
+    if (user) {
+      // Create a JWT token using the user's ID.
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+
+      // Remove the password before sending the user data to the frontend.
+      const { password, ...rest } = user._doc;
+
+      // Save the token in a cookie and send the user data.
+      res
+        .cookie("access_token", token, { httpOnly: true })
+        .status(200)
+        .json(rest);
+    } else {
+      // Generate a random password for the new Google user.
+      const generatedPass = Math.random().toString(36).slice(-8);
+
+      // Hash the generated password before saving it in the database.
+      const hashedPassword = bcrypt.hashSync(generatedPass, 10);
+
+      // Create a new user using the information received from Google.
+      const newUser = new User({
+        // Create a unique username from the user's Google name.
+        username:
+          req.body.name.split(" ").join("").toLowerCase() +
+          Math.random().toString(36).slice(-3),
+
+        // Save the user's Google email.
+        email: req.body.email,
+
+        // Save the hashed random password.
+        password: hashedPassword,
+
+        // Save the user's Google profile picture.
+        image: req.body.photo,
+      });
+
+      // Save the new user in MongoDB.
+      await newUser.save();
+
+      // Create a JWT token using the new user's ID.
+      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+
+      // Remove the password before sending the new user's data.
+      const { password, ...rest } = newUser._doc;
+
+      // Save the token in a cookie and send the new user data.
+      res
+        .cookie("access_token", token, { httpOnly: true })
+        .status(200)
+        .json(rest);
+    }
+  } catch (err) {
+    // Send any error to the error-handling middleware.
+    next(err);
+  }
+};
