@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { FaSearch } from "react-icons/fa";
 
 const Header = () => {
+  // Get the current user from the Redux store.
   const { currentUser } = useSelector((state) => state.user);
 
   return (
