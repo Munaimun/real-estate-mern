@@ -1,15 +1,20 @@
+import { useRef } from "react";
 import { useSelector } from "react-redux";
 
 const Profile = () => {
   // Get the current user from the Redux store.
   const { currentUser } = useSelector((state) => state.user);
 
+  const fileRef = useRef(null);
+
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
 
       <form className="flex flex-col gap-4">
+        <input type="file" ref={fileRef} hidden accept="image/*" />
         <img
+          onClick={() => fileRef.current.click()} // When the user clicks the profile picture, trigger a click on the hidden file input to allow them to select a new profile picture.
           src={currentUser.photo}
           alt="Profile"
           className="rounded-full h-24 w-24 object-cover cursor-pointer self-center mt-2"
