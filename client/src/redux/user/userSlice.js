@@ -36,9 +36,34 @@ const userSlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
+    updateUserStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    updateUserSuccess: (state, action) => {
+      state.currentUser = action.payload; // Update the current user with the new data.
+      state.loading = false;
+      state.error = null; // Clear any previous error.
+    },
+    updateUserFailure: (state, action) => {
+      state.error = action.payload; // Store the error message received from the server.
+      state.loading = false;
+    },
+    resetUserStatus: (state) => {
+      state.loading = false;
+      state.error = null;
+    },
   },
 });
 
 // Export these actions so components can use them with dispatch().
-export const { signInStart, signInSuccess, signInFailure } = userSlice.actions;
+export const {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+  updateUserStart,
+  updateUserSuccess,
+  updateUserFailure,
+  resetUserStatus,
+} = userSlice.actions;
 export default userSlice.reducer; // Export the reducer to be used in the Redux store.

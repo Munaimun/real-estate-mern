@@ -18,13 +18,21 @@ const storage = {
 
 // Combine all reducers into one main reducer.
 const rootReducer = combineReducers({
-  user: userReducer,
+  user: persistReducer(
+    {
+      key: "user",
+      storage,
+      whitelist: ["currentUser"],
+    },
+    userReducer,
+  ),
 });
 
 // Tell Redux Persist how to save the Redux state.
 const persistConfig = {
   key: "root", // Name used to store the saved Redux state.
   storage, // Save the state in the browser's localStorage.
+  blacklist: ["user"],
   version: 1, // Version of the saved state.
 };
 

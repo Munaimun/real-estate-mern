@@ -15,28 +15,27 @@ export const test = (req, res) => {
 export const updateUser = async (req, res, next) => {
   // Check if the logged-in user is allowed to update this user.
   if (req.user.id !== req.params.id)
-    return next(
-      errorHandler(401, "You are not authorized to update this user!"),
-    );
+    return next(errorHandler(401, "You are not authorized!"));
 
   try {
-    // If the user wants to change their password, hash the new password first.
-    if (req.body.password)
-      req.body.password = bcrypt.hashSync(req.body.password, 10);
+    const updates = {};
+    if (typeof req.body.username === "string" && req.body.username.trim())
+      updates.username = req.body.username.trim();
+    if (typeof req.body.email === "string" && req.body.email.trim())
+      updates.email = req.body.email.trim();
+    if (typeof req.body.photo === "string" && req.body.photo.trim())
+      updates.photo = req.body.photo.trim();
+    if (typeof req.body.password === "string" && req.body.password.trim())
+      updates.password = bcrypt.hashSync(req.body.password, 10);
+
+    if (!Object.keys(updates).length)
+      return next(errorHandler(400, "No profile changes were provided"));
 
     // Find the user by ID and update their information.
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
-      {
-        // Take the new information from the request and update these fields in the user's MongoDB document
-        $set: {
-          username: req.body.username,
-          email: req.body.email,
-          password: req.body.password,
-          photo: req.body.image,
-        },
-      },
-      { new: true }, // Return the updated user.
+      { $set: updates },
+      { new: true, runValidators: true }, // Return the updated user and validate changes.
     );
 
     if (!updatedUser) return next(errorHandler(404, "User not found"));

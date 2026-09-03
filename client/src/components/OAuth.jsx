@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -10,8 +11,11 @@ import { signInSuccess } from "../redux/user/userSlice";
 const OAuth = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [error, setError] = useState("");
 
   const handleGoogleSignIn = async () => {
+    setError("");
+
     try {
       // Create Google as the sign-in provider.
       const provider = new GoogleAuthProvider();
@@ -25,6 +29,7 @@ const OAuth = () => {
       // Send the Google user's information to our backend.
       const res = await fetch("/api/auth/google", {
         method: "POST", // Send the user data to the server.
+        credentials: "include",
         headers: {
           "Content-Type": "application/json", // Tell the server we are sending JSON.
         },
@@ -42,25 +47,35 @@ const OAuth = () => {
 
       // Convert the server response into JSON.
       const data = await res.json();
+      if (!res.ok || data.success === false) {
+        throw new Error(data.message || "Google sign-in failed");
+      }
 
       // Save the logged-in user data in Redux.
       dispatch(signInSuccess(data));
       navigate("/");
     } catch (err) {
-      // Show an error if Google sign-in fails.
-      console.log(err);
+      // Closing the popup is an expected cancellation, not an application error.
+      if (err.code !== "auth/popup-closed-by-user") {
+        setError(err.message || "Google sign-in failed");
+      }
     }
   };
 
   return (
-    <button
-      onClick={handleGoogleSignIn}
-      type="button"
-      className="flex items-center justify-center gap-3 w-full border border-gray-300 rounded-lg p-3 text-sm sm:text-base font-medium text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100 transition-colors duration-200"
-    >
-      <FcGoogle className="w-5 h-5 shrink-0" />
-      <span>Continue with Google</span>
-    </button>
+    <>
+      <button
+        onClick={handleGoogleSignIn}
+        type="button"
+        className="flex items-center justify-center gap-3 w-full border border-gray-300 rounded-lg p-3 text-sm sm:text-base font-medium text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100 transition-colors duration-200"
+      >
+        <FcGoogle className="w-5 h-5 shrink-0" />
+        <span>Continue with Google</span>
+      </button>
+      {error && (
+        <p className="text-red-500 text-sm mt-2 text-center">{error}</p>
+      )}
+    </>
   );
 };
 

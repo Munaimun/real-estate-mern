@@ -11,7 +11,7 @@ import OAuth from "../components/OAuth.jsx";
 
 const SignIn = () => {
   const [formtData, setFormData] = useState({});
-  const { loading, err } = useSelector((state) => state.user); // Get the loading and error state from Redux.
+  const { loading, error } = useSelector((state) => state.user); // Get the loading and error state from Redux.
 
   const navigate = useNavigate();
 
@@ -35,6 +35,7 @@ const SignIn = () => {
       // Send the form data to the signin API.
       const res = await fetch("/api/auth/signin", {
         method: "POST", // Send data to the server.
+        credentials: "include",
         headers: {
           "Content-Type": "application/json", // Tell the server we're sending JSON.
         },
@@ -88,7 +89,7 @@ const SignIn = () => {
           <span className="text-blue-700">Sign up</span>
         </Link>
       </div>
-      {err && <p className="text-red-500 mt-5">{err}</p>}
+      {error && <p className="text-red-500 mt-5">{error}</p>}
     </div>
   );
 };
