@@ -53,6 +53,19 @@ const userSlice = createSlice({
       state.loading = false;
       state.error = null;
     },
+    deleteUserStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    deleteuserSuccess: (state) => {
+      state.currentUser = null; // Clear the current user since the account has been deleted.
+      state.loading = false;
+      state.error = null; // Clear any previous error.
+    },
+    deleteUserFailure: (state, action) => {
+      state.error = action.payload; // Store the error message received from the server.
+      state.loading = false;
+    },
   },
 });
 
@@ -65,5 +78,8 @@ export const {
   updateUserSuccess,
   updateUserFailure,
   resetUserStatus,
+  deleteUserStart,
+  deleteuserSuccess,
+  deleteUserFailure,
 } = userSlice.actions;
 export default userSlice.reducer; // Export the reducer to be used in the Redux store.

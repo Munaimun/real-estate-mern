@@ -9,6 +9,9 @@ import {
   updateUserStart,
   updateUserFailure,
   resetUserStatus,
+  deleteUserFailure,
+  deleteUserStart,
+  deleteuserSuccess,
 } from "../redux/user/userSlice";
 
 // Default image shown when the user has no profile picture.
@@ -245,6 +248,40 @@ const Profile = () => {
     }
   };
 
+  // Handle deleting the user account.
+  const handleDeleteUser = async () => {
+    try {
+      // Tell Redux that the delete process has started.
+      // This can be used to set loading = true.
+      dispatch(deleteUserStart());
+
+      // Send a DELETE request to the backend.
+      // currentUser._id tells the backend which user to delete.
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+      });
+
+      // Convert the server response from JSON into a JavaScript object.
+      const data = await res.json();
+
+      // Check if the backend returned an error.
+      if (data.success === false) {
+        // Store the error message in Redux.
+        dispatch(deleteUserFailure(data.message || "Could not delete account"));
+
+        // Stop the function if deleting failed.
+        return;
+      }
+
+      // If deletion was successful, update Redux with the response.
+      dispatch(deleteuserSuccess(data));
+    } catch (err) {
+      // If something unexpected goes wrong,
+      // store the error message in Redux.
+      dispatch(deleteUserFailure(err.message));
+    }
+  };
+
   return (
     <div className="max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
@@ -328,7 +365,12 @@ const Profile = () => {
 
       <div className="flex justify-between">
         {/* Delete account option */}
-        <span className="text-red-700 cursor-pointer">Delete Account</span>
+        <span
+          onClick={handleDeleteUser}
+          className="text-red-700 cursor-pointer"
+        >
+          Delete Account
+        </span>
 
         {/* Sign out option */}
         <span className="text-red-700 cursor-pointer">Sign out</span>
