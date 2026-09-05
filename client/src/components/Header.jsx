@@ -3,6 +3,8 @@ import { useSelector } from "react-redux";
 
 import { FaSearch } from "react-icons/fa";
 
+const defaultAvatar = "/default-avatar.svg";
+
 const Header = () => {
   // Get the current user from the Redux store.
   const { currentUser } = useSelector((state) => state.user);
@@ -45,8 +47,12 @@ const Header = () => {
           <Link to="/profile">
             {currentUser ? (
               <img
-                src={currentUser.photo || currentUser.image}
+                src={currentUser.photo || currentUser.image || defaultAvatar}
                 alt="Profile"
+                onError={(event) => {
+                  event.currentTarget.onerror = null;
+                  event.currentTarget.src = defaultAvatar;
+                }}
                 className="rounded-full h-7 w-7 object-cover"
               />
             ) : (
