@@ -12,6 +12,9 @@ import {
   deleteUserFailure,
   deleteUserStart,
   deleteuserSuccess,
+  singOutUserStart,
+  signOutUserFailure,
+  signOutUserSuccess,
 } from "../redux/user/userSlice";
 
 // Default image shown when the user has no profile picture.
@@ -282,6 +285,24 @@ const Profile = () => {
     }
   };
 
+  // Handle signing out the user.
+  const handleSignOut = async () => {
+    try {
+      dispatch(singOutUserStart());
+
+      const res = await fetch("/api/auth/signout");
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(signOutUserFailure(data.message || "Could not sign out"));
+        return;
+      }
+
+      dispatch(signOutUserSuccess());
+    } catch (err) {
+      dispatch(signOutUserFailure(err.message));
+    }
+  };
+
   return (
     <div className="max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
@@ -373,7 +394,9 @@ const Profile = () => {
         </span>
 
         {/* Sign out option */}
-        <span className="text-red-700 cursor-pointer">Sign out</span>
+        <span onClick={handleSignOut} className="text-red-700 cursor-pointer">
+          Sign out
+        </span>
       </div>
     </div>
   );
