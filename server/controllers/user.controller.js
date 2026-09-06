@@ -51,18 +51,20 @@ export const updateUser = async (req, res, next) => {
   }
 };
 
+// Delete a user account.
 export const deleteUser = async (req, res, next) => {
+  // if the logged-in user is not the same as the user to be deleted, return an error.
   if (req.user.id !== req.params.id)
     return next(
       errorHandler(401, "You are not authorized to delete this account!"),
     );
 
   try {
-    await User.findByIdAndDelete(req.params.id);
+    await User.findByIdAndDelete(req.params.id); // Delete the user from the database.
     res
       .status(200)
       .json({ message: "User account deleted successfully." })
-      .clearCookie("access_token");
+      .clearCookie("access_token"); // Clear the access token cookie after deleting the user account.
   } catch (err) {
     next(err);
   }
