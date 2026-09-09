@@ -1,28 +1,54 @@
-import { useState } from "react";
-
-import { getStorage, ref } from "firebase/storage";
-
-import { app } from "../firebase";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const CreateListing = () => {
   const [files, setFiles] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleImageSubmit = (e) => {
-    if (files.length > 0 && files.length < 7) {
-      const promises = [];
+  const imagePreviews = useMemo(
+    () =>
+      files.map((file) => ({
+        name: file.name,
+        url: URL.createObjectURL(file),
+      })),
+    [files],
+  );
 
-      for (let i = 0; i < files.length; i++)
-        promises.push(storeImage(files[i]));
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach((preview) => URL.revokeObjectURL(preview.url));
+    };
+  }, [imagePreviews]);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
+    if (!files.length || files.length > 6) {
+      setError("Choose between 1 and 6 images.");
+      return;
     }
-  };
 
-  const storeImage = async (file) => {
-    return new Promise((resolve, reject) => {
-      const storage = getStorage();
-      const fileName = new Date().getTime() + file.name;
-      const storageRef = ref(storage, fileName);
-      const uploadTask = uploadBytesResumable(storageRef, file);
-    });
+    const formData = new FormData(event.currentTarget);
+    files.forEach((file) => formData.append("images", file));
+
+    try {
+      setLoading(true);
+      const response = await fetch("/api/listing/create", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.message || "Could not create listing");
+      navigate("/");
+    } catch (submitError) {
+      setError(submitError.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -30,139 +56,124 @@ const CreateListing = () => {
       <h1 className="text-3xl font-semibold text-center mb-6">
         Create a Listing
       </h1>
-
-      <form className="flex flex-col sm:flex-row gap-6">
+      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-6">
         <div className="flex flex-col gap-2 flex-1">
           <input
+            name="name"
             type="text"
             placeholder="Name"
             className="border p-3 rounded-lg"
-            id="name"
             maxLength="62"
             minLength="10"
             required
           />
           <textarea
-            type="text"
+            name="description"
             placeholder="Description"
             className="border p-3 rounded-lg"
-            id="description"
             required
           />
           <input
+            name="address"
             type="text"
             placeholder="Address"
             className="border p-3 rounded-lg"
-            id="address"
             required
           />
-          {/* check box's */}
           <div className="flex gap-6 flex-wrap">
-            <div className="flex gap-2">
-              <input type="checkbox" id="sale" className="w-5" />
-              <span>Sell</span>
-            </div>
-            <div className="flex gap-2">
-              <input type="checkbox" id="rent" className="w-5" />
-              <span>Rent</span>
-            </div>
-            <div className="flex gap-2">
-              <input type="checkbox" id="parking" className="w-5" />
-              <span>Parking Spot</span>
-            </div>
-            <div className="flex gap-2">
-              <input type="checkbox" id="furnished" className="w-5" />
-              <span>Furnished</span>
-            </div>{" "}
-            <div className="flex gap-2">
-              <input type="checkbox" id="offer" className="w-5" />
-              <span>Offer</span>
-            </div>
+            <label>
+              <input name="type" value="sale" type="radio" required /> Sell
+            </label>
+            <label>
+              <input name="type" value="rent" type="radio" /> Rent
+            </label>
+            <label>
+              <input name="parking" value="true" type="checkbox" /> Parking Spot
+            </label>
+            <label>
+              <input name="furnished" value="true" type="checkbox" /> Furnished
+            </label>
+            <label>
+              <input name="offer" value="true" type="checkbox" /> Offer
+            </label>
           </div>
-
           <div className="flex flex-wrap gap-3">
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                id="bedrooms"
-                min="1"
-                max="10"
-                required
-                className="w-20 shrink-0 border border-gray-300 rounded-lg text-center p-1 bg-white"
-              />
-              <p>Beds</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                id="baths"
-                min="1"
-                max="10"
-                required
-                className="w-20 shrink-0 border border-gray-300 rounded-lg text-center p-1 bg-white"
-              />
-              <p>Baths</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                id="regular-price"
-                min="1"
-                max="10000000"
-                required
-                className="border border-gray-300 rounded-lg text-center p-1 bg-white"
-              />
-              <div className="">
-                <p>Regular Price</p>
-                <span className="text-xs">($ / month)</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                id="discount-price"
-                min="1"
-                max="10000000"
-                required
-                className="border border-gray-300 rounded-lg text-center p-1 bg-white"
-              />
-              <div className="">
-                <p>Discount Price</p>
-                <span className="text-xs">($ / month)</span>
-              </div>
-            </div>
+            <input
+              name="bedrooms"
+              type="number"
+              min="1"
+              max="10"
+              placeholder="Beds"
+              required
+              className="w-24 border rounded-lg p-2"
+            />
+            <input
+              name="bathrooms"
+              type="number"
+              min="1"
+              max="10"
+              placeholder="Baths"
+              required
+              className="w-24 border rounded-lg p-2"
+            />
+            <input
+              name="regularPrice"
+              type="number"
+              min="1"
+              placeholder="Regular price"
+              required
+              className="border rounded-lg p-2"
+            />
+            <input
+              name="discountPrice"
+              type="number"
+              min="1"
+              placeholder="Discount price"
+              required
+              className="border rounded-lg p-2"
+            />
           </div>
         </div>
-
-        {/* image and submit button */}
         <div className="flex flex-col flex-1 gap-4">
           <p className="font-semibold">
-            Images:
-            <span className="font-normal text-gray-700 ml-2">
-              The first image will be the cover (max 6)
+            Images:{" "}
+            <span className="font-normal text-gray-700">
+              the first image is the cover (max 6)
             </span>
           </p>
-
-          <div className="flex gap-4">
-            <input
-              onChange={(e) => setFiles(e.target.files)}
-              type="file"
-              id="images"
-              accept="image/*"
-              multiple
-              className="p-3 border border-gray-300 rounded w-full"
-            />
-            <button
-              type="button"
-              onSubmit={handleImageSubmit}
-              className="p-3 text-green-700 border border-green-700 rounded uppercase hover:shadow-lg disabled:opacity-85"
-            >
-              Upload
-            </button>
-          </div>
-          <button className="p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80">
-            Create Listing
+          <input
+            onChange={(event) => setFiles([...event.target.files])}
+            type="file"
+            accept="image/*"
+            multiple
+            className="p-3 border border-gray-300 rounded w-full"
+            required
+          />
+          {imagePreviews.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {imagePreviews.map((preview, index) => (
+                <div key={`${preview.name}-${index}`} className="relative">
+                  <img
+                    src={preview.url}
+                    alt={`Listing preview ${index + 1}`}
+                    className="h-28 w-full rounded-lg object-cover border"
+                  />
+                  {index === 0 && (
+                    <span className="absolute bottom-1 left-1 rounded bg-slate-800 px-2 py-1 text-xs text-white">
+                      Cover
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          <button
+            disabled={loading}
+            className="p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
+          >
+            {loading ? "Creating..." : "Create Listing"}
           </button>
+          {error && <p className="text-red-700">{error}</p>}
         </div>
       </form>
     </main>

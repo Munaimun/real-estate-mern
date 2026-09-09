@@ -2,9 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { useDispatch, useSelector } from "react-redux";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-
-import { storage } from "../firebase";
 import {
   updateUserSuccess,
   updateUserStart,
@@ -20,55 +17,6 @@ import {
 
 // Default image shown when the user has no profile picture.
 const defaultAvatar = "/default-avatar.svg";
-
-// Upload an image to Firebase Storage.
-const uploadImage = (imageRef, file) =>
-  new Promise((resolve, reject) => {
-    // Start uploading the selected file to Firebase.
-    const uploadTask = uploadBytesResumable(imageRef, file);
-
-    // Stop the upload if it takes longer than 30 seconds.
-    const timeoutId = setTimeout(() => {
-      uploadTask.cancel();
-      reject(new Error("Image upload timed out. Check Firebase Storage."));
-    }, 30000);
-
-    // Listen to the upload status.
-    uploadTask.on(
-      "state_changed",
-
-      // We are not using upload progress here.
-      undefined,
-
-      // If the upload fails, clear the timer and return the error.
-      (error) => {
-        clearTimeout(timeoutId);
-        reject(error);
-      },
-
-      // When the upload finishes successfully.
-      () => {
-        clearTimeout(timeoutId);
-
-        // Return the Firebase storage reference.
-        resolve(uploadTask.snapshot.ref);
-      },
-    );
-  });
-
-// Wait for a Promise, but stop waiting if it takes too long.
-const withTimeout = (promise, milliseconds) =>
-  Promise.race([
-    promise,
-
-    // Reject the Promise if the given time has passed.
-    new Promise((_, reject) =>
-      setTimeout(
-        () => reject(new Error("Could not retrieve the uploaded image URL.")),
-        milliseconds,
-      ),
-    ),
-  ]);
 
 const Profile = () => {
   // Get the current user and loading state from Redux.
@@ -163,49 +111,23 @@ const Profile = () => {
       // Tell Redux that the update process has started.
       dispatch(updateUserStart());
 
-      // By default, keep the user's current profile photo.
-      let photo = formData.photo;
-
-      // If the user selected a new image, upload it to Firebase.
-      if (selectedFile) {
-        // Create a unique Firebase Storage path for the image.
-        const imageRef = ref(
-          storage,
-          `profile-images/${currentUser._id}-${Date.now()}-${selectedFile.name}`,
-        );
-
-        // Upload the selected image to Firebase.
-        await uploadImage(imageRef, selectedFile);
-
-        // Get the public/download URL of the uploaded image.
-        photo = await withTimeout(getDownloadURL(imageRef), 30000);
-      }
-
-      // Create the data that will be sent to the backend.
-      const updateData = {
-        username: formData.username.trim(),
-        email: formData.email.trim(),
-        photo,
-      };
+      const updateData = new FormData();
+      updateData.append("username", formData.username.trim());
+      updateData.append("email", formData.email.trim());
+      if (selectedFile) updateData.append("profileImage", selectedFile);
 
       // Only send a password if the user entered a new one.
       if (formData.password.trim()) {
-        updateData.password = formData.password;
+        updateData.append("password", formData.password);
       }
 
       // Send the updated user information to the backend.
       const res = await fetch(`/api/user/update/${currentUser._id}`, {
         method: "POST",
 
-        headers: {
-          "Content-Type": "application/json",
-        },
-
         // Send cookies such as the JWT access token.
         credentials: "include",
-
-        // Convert the JavaScript object into JSON.
-        body: JSON.stringify(updateData),
+        body: updateData,
       });
 
       // Convert the server response from JSON into a JavaScript object.
@@ -235,7 +157,7 @@ const Profile = () => {
         password: "",
 
         // Use the new photo returned by the backend.
-        photo: data.photo || photo,
+        photo: data.photo || formData.photo,
       }));
 
       // Clear the selected file.

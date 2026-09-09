@@ -23,8 +23,13 @@ export const updateUser = async (req, res, next) => {
       updates.username = req.body.username.trim();
     if (typeof req.body.email === "string" && req.body.email.trim())
       updates.email = req.body.email.trim();
-    if (typeof req.body.photo === "string" && req.body.photo.trim())
-      updates.photo = req.body.photo.trim();
+    if (req.files?.find((file) => file.fieldname === "profileImage")) {
+      const image = req.files.find((file) => file.fieldname === "profileImage");
+      updates.profileImage = {
+        data: image.buffer,
+        contentType: image.mimetype,
+      };
+    }
     if (typeof req.body.password === "string" && req.body.password.trim())
       updates.password = bcrypt.hashSync(req.body.password, 10);
 
@@ -41,12 +46,32 @@ export const updateUser = async (req, res, next) => {
     if (!updatedUser) return next(errorHandler(404, "User not found"));
 
     // Remove the password before sending the user data to the frontend.
-    const { password, ...rest } = updatedUser._doc;
+    const rest = {
+      _id: updatedUser._id,
+      username: updatedUser.username,
+      email: updatedUser.email,
+      photo: updatedUser.profileImage?.data
+        ? `/api/user/${updatedUser._id}/photo`
+        : updatedUser.photo,
+      createdAt: updatedUser.createdAt,
+      updatedAt: updatedUser.updatedAt,
+    };
 
     // Send the updated user without the password.
     res.status(200).json(rest);
   } catch (err) {
     // Send the error to the error-handling middleware.
+    next(err);
+  }
+};
+
+export const getUserPhoto = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).select("profileImage");
+    if (!user?.profileImage?.data) return res.sendStatus(404);
+
+    res.type(user.profileImage.contentType).send(user.profileImage.data);
+  } catch (err) {
     next(err);
   }
 };
