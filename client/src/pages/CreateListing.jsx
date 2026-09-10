@@ -1,12 +1,26 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { useSelector } from "react-redux";
+
 const CreateListing = () => {
+  // Get the currently logged-in user from Redux.
+  const { currentUser } = useSelector((state) => state.user.currentUser);
+
   const [files, setFiles] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
+  // If there is no logged-in user, send them to the sign-in page.
+  useEffect(() => {
+    if (!currentUser) {
+      navigate("/sign-in");
+    }
+  }, [currentUser, navigate]);
+
+  // Create image previews for the selected files.
   const imagePreviews = useMemo(
     () =>
       files.map((file) => ({
@@ -16,6 +30,7 @@ const CreateListing = () => {
     [files],
   );
 
+  // Clean up the temporary image URLs when they are no longer needed.
   useEffect(() => {
     return () => {
       imagePreviews.forEach((preview) => URL.revokeObjectURL(preview.url));
@@ -25,11 +40,14 @@ const CreateListing = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
+
+    // Make sure the user selects between 1 and 6 images.
     if (!files.length || files.length > 6) {
       setError("Choose between 1 and 6 images.");
       return;
     }
 
+    // Get all text/checkbox/radio values from the form.
     const formData = new FormData(event.currentTarget);
     files.forEach((file) => formData.append("images", file));
 
@@ -40,7 +58,9 @@ const CreateListing = () => {
         credentials: "include",
         body: formData,
       });
+
       const data = await response.json();
+
       if (!response.ok)
         throw new Error(data.message || "Could not create listing");
       navigate("/");

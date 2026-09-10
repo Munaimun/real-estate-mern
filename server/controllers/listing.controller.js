@@ -13,6 +13,7 @@ export const createListing = async (req, res, next) => {
         .status(400)
         .json({ success: false, message: "Choose between 1 and 6 images" });
 
+    // Create the listing in MongoDB
     const listing = await Listing.create({
       ...req.body,
       regularPrice: Number(req.body.regularPrice),
