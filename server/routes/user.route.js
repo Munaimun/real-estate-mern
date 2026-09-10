@@ -6,6 +6,7 @@ import {
   test,
   updateUser,
   getUserPhoto,
+  getUserListings,
 } from "../controllers/user.controller.js";
 import { verifyToken } from "../utils/verifyUser.js";
 
@@ -16,6 +17,7 @@ const upload = multer({
 });
 
 router.get("/test", test);
+router.get("/listings/:id", verifyToken, getUserListings);
 router.get("/:id/photo", getUserPhoto);
 router.post("/update/:id", verifyToken, upload.any(), updateUser);
 router.delete("/delete/:id", verifyToken, deleteUser);

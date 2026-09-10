@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 
 import User from "../models/user.model.js";
 import { errorHandler } from "../utils/error.js";
+import Listing from "../models/listing.model.js";
 
 // Test if the user route is working.
 export const test = (req, res) => {
@@ -89,6 +90,29 @@ export const deleteUser = async (req, res, next) => {
     res.clearCookie("access_token"); // Clear the authentication cookie.
     res.status(200).json({ message: "User account deleted successfully." });
   } catch (err) {
+    next(err);
+  }
+};
+
+// Get all listings created by a specific user.
+export const getUserListings = async (req, res, next) => {
+  // Check if the logged-in user is trying to view their own listings.
+  // req.user.id comes from the verified JWT.
+  // req.params.id comes from the URL.
+  if (req.user.id !== req.params.id) {
+    return next(errorHandler(401, "You can only view your own listings!"));
+  }
+
+  try {
+    // Find all listings where userRef matches the user's ID.
+    const listings = await Listing.find({
+      userRef: req.params.id,
+    });
+
+    // Send the user's listings back to the frontend.
+    res.status(200).json(listings);
+  } catch (err) {
+    // Pass any database/server error to the error handler.
     next(err);
   }
 };
