@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 const CreateListing = () => {
   // Get the currently logged-in user from Redux.
-  const { currentUser } = useSelector((state) => state.user.currentUser);
+  const { currentUser } = useSelector((state) => state.user);
 
   const [files, setFiles] = useState([]);
   const [error, setError] = useState("");

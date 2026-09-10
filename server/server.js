@@ -2,7 +2,6 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import multer from "multer";
 
 import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
@@ -22,12 +21,6 @@ mongoose
 const app = express();
 app.use(express.json()); // Middleware to parse JSON request bodies
 app.use(cookieParser()); // Middleware to parse cookies
-app.use(
-  multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 },
-  }).any(),
-);
 
 const PORT = 5000;
 

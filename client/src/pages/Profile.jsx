@@ -244,7 +244,7 @@ const Profile = () => {
             event.currentTarget.onerror = null;
             event.currentTarget.src = defaultAvatar;
           }}
-          className="rounded-full h-24 w-24 object-cover cursor-pointer self-center mt-2"
+          className="rounded-full h-24 w-24 object-cover cursor-pointer self-center"
         />
 
         {/* 
