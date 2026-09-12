@@ -17,9 +17,9 @@ const upload = multer({
 });
 
 router.get("/test", test);
-router.get("/listings/:id", verifyToken, getUserListings);
 router.get("/:id/photo", getUserPhoto);
 router.post("/update/:id", verifyToken, upload.any(), updateUser);
 router.delete("/delete/:id", verifyToken, deleteUser);
+router.get("/listings/:id", verifyToken, getUserListings);
 
 export default router;

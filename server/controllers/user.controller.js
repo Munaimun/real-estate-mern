@@ -109,8 +109,20 @@ export const getUserListings = async (req, res, next) => {
       userRef: req.params.id,
     });
 
+    // Return browser-loadable URLs instead of exposing image buffers in JSON.
+    const listingsWithImageUrls = listings.map((listing) => {
+      const listingData = listing.toObject();
+
+      return {
+        ...listingData,
+        images: listing.images.map(
+          (_, imageIndex) => `/api/listing/${listing._id}/image/${imageIndex}`,
+        ),
+      };
+    });
+
     // Send the user's listings back to the frontend.
-    res.status(200).json(listings);
+    res.status(200).json(listingsWithImageUrls);
   } catch (err) {
     // Pass any database/server error to the error handler.
     next(err);
