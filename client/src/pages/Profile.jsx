@@ -45,6 +45,9 @@ const Profile = () => {
   // Store a success message.
   const [success, setSuccess] = useState("");
 
+  const [showUserListings, setShowUserListings] = useState([]);
+  const [showListingsError, setShowListingsError] = useState(false);
+
   // useRef is used to access the hidden file input.
   const fileRef = useRef(null);
 
@@ -226,10 +229,28 @@ const Profile = () => {
     }
   };
 
+  // Showing the user's listings.
+  const handleShowListings = async () => {
+    try {
+      setShowListingsError(false);
+      const res = await fetch(`/api/user/listings/${currentUser._id}`); // Fetch the user's listings from the backend.
+      const data = await res.json();
+
+      if (data.success === false) {
+        setShowListingsError(true);
+        return;
+      }
+
+      setShowUserListings(data);
+    } catch (err) {
+      console.error("Error showing listings:", err);
+      setShowListingsError(true);
+    }
+  };
+
   return (
     <div className="max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
-
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {/* 
           When the profile picture is clicked,
@@ -306,13 +327,10 @@ const Profile = () => {
           Create Listing
         </Link>
       </form>
-
       {/* Show error message if there is an error. */}
       {updateError && <p className="text-red-700 mt-4">{updateError}</p>}
-
       {/* Show success message after a successful update. */}
       {success && <p className="text-green-700 mt-4">{success}</p>}
-
       <div className="flex justify-between">
         {/* Delete account option */}
         <span
@@ -327,6 +345,38 @@ const Profile = () => {
           Sign out
         </span>
       </div>
+      {/* Show the user's listings when the button is clicked. */}
+      <button onClick={handleShowListings} className="text-green-700 w-full">
+        Show Listings
+      </button>
+      <p>{showListingsError ? "Error showing listings" : ""}</p>
+      {showUserListings && showUserListings.length > 0
+        ? showUserListings.map((listing) => (
+            <div
+              key={listing._id}
+              className="border border-slate-500 m-2 rounded-lg p-3 flex justify-between items-center gap-2"
+            >
+              <Link to={`/listing/${listing._id}`}>
+                <img
+                  src={listing.images[0]}
+                  alt="listing cover"
+                  className="h-16 w-16 object-contain"
+                />
+              </Link>
+              <Link
+                className="flex-1 font-semibold text-slate-700 hover:underline truncate"
+                to={`/listing/${listing._id}`}
+              >
+                <p>{listing.name}</p>
+              </Link>
+
+              <div className="flex flex-col items-center">
+                <button className="text-red-700 uppercase">Delete</button>
+                <button className="text-green-700 uppercase">Edit</button>
+              </div>
+            </div>
+          ))
+        : "nothing"}
     </div>
   );
 };
