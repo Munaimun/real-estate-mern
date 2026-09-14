@@ -5,6 +5,7 @@ import {
   createListing,
   deleteListing,
   updateListing,
+  getListing,
 } from "../controllers/listing.controller.js";
 
 import { verifyToken } from "../utils/verifyUser.js";
@@ -32,6 +33,8 @@ router.post(
   upload.array("images", 6),
   updateListing,
 );
+
+router.get("/get/:id", getListing); // This route gets a specific listing by its ID.
 
 // This route gets a specific image from a listing.
 // :id = the listing's MongoDB ID

@@ -144,8 +144,7 @@ export const updateListing = async (req, res, next) => {
 
       {
         // Return the updated listing instead of the old listing.
-        new: true,
-
+        returnDocument: "after",
         // Run the schema validation before saving the update.
         runValidators: true,
       },
@@ -155,6 +154,18 @@ export const updateListing = async (req, res, next) => {
     res.status(200).json(updatedListing);
   } catch (err) {
     // If something goes wrong, pass the error to Express error handling.
+    next(err);
+  }
+};
+
+export const getListing = async (req, res, next) => {
+  try {
+    const listing = await Listing.findById(req.params.id);
+
+    if (!listing) return next(errorHandler(404, "Listing not found"));
+
+    res.status(200).json(listing);
+  } catch (err) {
     next(err);
   }
 };
