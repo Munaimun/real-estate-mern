@@ -1,4 +1,5 @@
 import Listing from "../models/listing.model.js";
+import { errorHandler } from "../utils/error.js";
 
 // This function creates a new listing and saves it to MongoDB.
 export const createListing = async (req, res, next) => {
@@ -51,12 +52,11 @@ export const deleteListing = async (req, res, next) => {
 
     // Check if the logged-in user owns this listing.
     // req.user.id comes from the JWT token.
-    // listing.userRef is the user who created the listing.
+    // listing.userRef is the user who created the listing, which is stored in the database.
     if (req.user.id !== listing.userRef) {
-      return res.status(403).json({
-        success: false,
-        message: "You are not authorized to delete this listing",
-      });
+      return next(
+        errorHandler(403, "You are not authorized to delete this listing"),
+      );
     }
 
     // Delete the listing from MongoDB.
@@ -68,6 +68,60 @@ export const deleteListing = async (req, res, next) => {
     });
   } catch (err) {
     // Pass any database/server error to the error handler.
+    next(err);
+  }
+};
+
+// This function updates a listing in MongoDB.
+export const updateListing = async (req, res, next) => {
+  try {
+    // Find the listing using the ID in the URL.
+    const listing = await Listing.findById(req.params.id);
+
+    if (!listing)
+      return res
+        .status(404)
+        .json({ success: false, message: "Listing not found!" });
+
+    // Check that the logged-in user owns this listing.
+    if (req.user.id !== listing.userRef)
+      return next(
+        errorHandler(403, "You are not authorized to update this listing"),
+      );
+
+    const updateData = { ...req.body };
+    const numericFields = [
+      "regularPrice",
+      "discountPrice",
+      "bathrooms",
+      "bedrooms",
+    ];
+    const booleanFields = ["furnished", "parking", "offer"];
+
+    for (const field of numericFields) {
+      if (field in updateData) updateData[field] = Number(updateData[field]);
+    }
+
+    for (const field of booleanFields) {
+      if (field in updateData) updateData[field] = updateData[field] === "true";
+    }
+
+    // Replace the stored images only when new files were uploaded.
+    if (req.files?.length) {
+      updateData.images = req.files.map((file) => ({
+        data: file.buffer,
+        contentType: file.mimetype,
+      }));
+    }
+
+    const updatedListing = await Listing.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true },
+    );
+
+    res.status(200).json(updatedListing);
+  } catch (err) {
     next(err);
   }
 };

@@ -4,6 +4,7 @@ import multer from "multer";
 import {
   createListing,
   deleteListing,
+  updateListing,
 } from "../controllers/listing.controller.js";
 
 import { verifyToken } from "../utils/verifyUser.js";
@@ -20,8 +21,17 @@ const upload = multer({
 // verifyToken runs first to make sure the user is logged in.
 // If the user is authenticated, createListing handles the request.
 router.post("/create", verifyToken, upload.array("images", 6), createListing);
+
 // route to delete a listing
 router.delete("/delete/:id", verifyToken, deleteListing);
+
+// route to update a listing
+router.post(
+  "/update/:id",
+  verifyToken,
+  upload.array("images", 6),
+  updateListing,
+);
 
 // This route gets a specific image from a listing.
 // :id = the listing's MongoDB ID
