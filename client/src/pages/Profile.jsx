@@ -248,6 +248,29 @@ const Profile = () => {
     }
   };
 
+  // Handle deleting a listing.
+  const handleDeleteListing = async (listingId) => {
+    try {
+      // Send a DELETE request to the backend to delete the listing.
+      const res = await fetch(`/api/listing/delete/${listingId}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      if (data.success === false) {
+        console.error("Error deleting listing:", data.message);
+        return;
+      }
+
+      setShowUserListings(
+        (prevListings) =>
+          prevListings.filter((listing) => listing._id !== listingId), // Remove the deleted listing from the state.
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <div className="max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
@@ -350,33 +373,38 @@ const Profile = () => {
         Show Listings
       </button>
       <p>{showListingsError ? "Error showing listings" : ""}</p>
-      {showUserListings && showUserListings.length > 0
-        ? showUserListings.map((listing) => (
-            <div
-              key={listing._id}
-              className="border border-slate-500 m-2 rounded-lg p-3 flex justify-between items-center gap-2"
+      {showUserListings &&
+        showUserListings.length > 0 &&
+        showUserListings.map((listing) => (
+          <div
+            key={listing._id}
+            className="border border-slate-500 m-2 rounded-lg p-3 flex justify-between items-center gap-2"
+          >
+            <Link to={`/listing/${listing._id}`}>
+              <img
+                src={listing.images[0]}
+                alt="listing cover"
+                className="h-16 w-16 object-contain"
+              />
+            </Link>
+            <Link
+              className="flex-1 font-semibold text-slate-700 hover:underline truncate"
+              to={`/listing/${listing._id}`}
             >
-              <Link to={`/listing/${listing._id}`}>
-                <img
-                  src={listing.images[0]}
-                  alt="listing cover"
-                  className="h-16 w-16 object-contain"
-                />
-              </Link>
-              <Link
-                className="flex-1 font-semibold text-slate-700 hover:underline truncate"
-                to={`/listing/${listing._id}`}
-              >
-                <p>{listing.name}</p>
-              </Link>
+              <p>{listing.name}</p>
+            </Link>
 
-              <div className="flex flex-col items-center">
-                <button className="text-red-700 uppercase">Delete</button>
-                <button className="text-green-700 uppercase">Edit</button>
-              </div>
+            <div className="flex flex-col items-center">
+              <button
+                onClick={() => handleDeleteListing(listing._id)}
+                className="text-red-700 uppercase"
+              >
+                Delete
+              </button>
+              <button className="text-green-700 uppercase">Edit</button>
             </div>
-          ))
-        : "nothing"}
+          </div>
+        ))}
     </div>
   );
 };

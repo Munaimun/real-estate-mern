@@ -34,3 +34,40 @@ export const createListing = async (req, res, next) => {
     next(err);
   }
 };
+
+// This function deletes a listing from MongoDB.
+export const deleteListing = async (req, res, next) => {
+  try {
+    // Find the listing using the ID from the URL.
+    const listing = await Listing.findById(req.params.id);
+
+    // If no listing was found, send a 404 error.
+    if (!listing) {
+      return res.status(404).json({
+        success: false,
+        message: "Listing not found",
+      });
+    }
+
+    // Check if the logged-in user owns this listing.
+    // req.user.id comes from the JWT token.
+    // listing.userRef is the user who created the listing.
+    if (req.user.id !== listing.userRef) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to delete this listing",
+      });
+    }
+
+    // Delete the listing from MongoDB.
+    await Listing.findByIdAndDelete(req.params.id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Listing deleted successfully",
+    });
+  } catch (err) {
+    // Pass any database/server error to the error handler.
+    next(err);
+  }
+};
