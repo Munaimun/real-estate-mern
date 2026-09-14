@@ -72,56 +72,89 @@ export const deleteListing = async (req, res, next) => {
   }
 };
 
-// This function updates a listing in MongoDB.
+// Update an existing listing.
 export const updateListing = async (req, res, next) => {
   try {
-    // Find the listing using the ID in the URL.
+    // Find the listing using the ID from the URL.
     const listing = await Listing.findById(req.params.id);
 
+    // If the listing does not exist, send a 404 error.
     if (!listing)
       return res
         .status(404)
         .json({ success: false, message: "Listing not found!" });
 
-    // Check that the logged-in user owns this listing.
+    // Check if the logged-in user owns this listing.
+    // req.user.id comes from the logged-in user's JWT token.
+    // listing.userRef is the ID of the user who created the listing, which is stored in the database.
     if (req.user.id !== listing.userRef)
       return next(
         errorHandler(403, "You are not authorized to update this listing"),
       );
 
+    // Copy all the data sent from the frontend into a new object, this prevents us from directly changing req.body.
     const updateData = { ...req.body };
+
+    // These fields should be stored as numbers in MongoDB.
     const numericFields = [
       "regularPrice",
       "discountPrice",
       "bathrooms",
       "bedrooms",
     ];
+
+    // These fields should be stored as true or false.
     const booleanFields = ["furnished", "parking", "offer"];
 
+    // Convert numeric fields from strings to numbers.
+    // FormData sends values as strings.
     for (const field of numericFields) {
-      if (field in updateData) updateData[field] = Number(updateData[field]);
+      // Check if the field exists in the updateData object.
+      if (field in updateData) {
+        updateData[field] = Number(updateData[field]);
+      }
     }
 
+    // Convert boolean fields from strings to actual booleans.
+    // For example, "true" becomes true and "false" becomes false.
     for (const field of booleanFields) {
-      if (field in updateData) updateData[field] = updateData[field] === "true";
+      if (field in updateData) {
+        updateData[field] = updateData[field] === "true";
+      }
     }
 
-    // Replace the stored images only when new files were uploaded.
+    // If the user uploaded new images,
+    // replace the old images with the new ones.
     if (req.files?.length) {
       updateData.images = req.files.map((file) => ({
+        // Store the actual image data.
         data: file.buffer,
+
+        // Store the image's file type, such as image/jpeg.
         contentType: file.mimetype,
       }));
     }
 
+    // Find the listing by ID and update it with the new data.
     const updatedListing = await Listing.findByIdAndUpdate(
       req.params.id,
+
+      // Send the updated fields to MongoDB.
       updateData,
-      { new: true, runValidators: true },
+
+      {
+        // Return the updated listing instead of the old listing.
+        new: true,
+
+        // Run the schema validation before saving the update.
+        runValidators: true,
+      },
     );
 
+    // Send the updated listing back to the frontend.
     res.status(200).json(updatedListing);
   } catch (err) {
+    // If something goes wrong, pass the error to Express error handling.
     next(err);
   }
 };
