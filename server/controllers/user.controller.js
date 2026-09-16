@@ -128,3 +128,18 @@ export const getUserListings = async (req, res, next) => {
     next(err);
   }
 };
+
+// Get a user's information by their ID.
+export const getUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) return next(404, "User not found");
+
+    const { password: pass, ...rest } = user._doc;
+
+    return res.status(200).json(rest);
+  } catch (err) {
+    next(err);
+  }
+};

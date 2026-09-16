@@ -7,6 +7,7 @@ import {
   updateUser,
   getUserPhoto,
   getUserListings,
+  getUser,
 } from "../controllers/user.controller.js";
 import { verifyToken } from "../utils/verifyUser.js";
 
@@ -21,5 +22,6 @@ router.get("/:id/photo", getUserPhoto);
 router.post("/update/:id", verifyToken, upload.any(), updateUser);
 router.delete("/delete/:id", verifyToken, deleteUser);
 router.get("/listings/:id", verifyToken, getUserListings);
+router.get("/:id", verifyToken, getUser);
 
 export default router;

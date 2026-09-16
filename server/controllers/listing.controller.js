@@ -158,13 +158,19 @@ export const updateListing = async (req, res, next) => {
   }
 };
 
+// This function fetches a specific listing from MongoDB using its ID.
 export const getListing = async (req, res, next) => {
   try {
     const listing = await Listing.findById(req.params.id);
 
     if (!listing) return next(errorHandler(404, "Listing not found"));
 
-    res.status(200).json(listing);
+    const listingData = listing.toObject();
+    listingData.images = listing.images.map(
+      (_, imageIndex) => `/api/listing/${listing._id}/image/${imageIndex}`,
+    );
+
+    res.status(200).json(listingData);
   } catch (err) {
     next(err);
   }
