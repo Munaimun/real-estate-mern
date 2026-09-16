@@ -175,3 +175,95 @@ export const getListing = async (req, res, next) => {
     next(err);
   }
 };
+
+// This function gets listings from MongoDB.
+// It can also filter, sort, limit, and skip listings based on values sent in the URL query parameters.
+export const getListings = async (req, res, next) => {
+  try {
+    // Get the maximum number of listings to return.
+    // If the user does not provide a limit, return 9 listings.
+    const limit = parseInt(req.query.limit) || 9;
+
+    // Get the number of listings to skip.
+    // This is mainly used for pagination.
+    // Example: startIndex = 9 means skip the first 9 listings.
+    const startIndex = parseInt(req.query.startIndex) || 0;
+
+    // Get the offer filter from the URL.
+    let offer = req.query.offer;
+
+    // If offer is "undefined" or "false", allow both listings with and without offers.
+    if (offer === undefined || offer === "false") {
+      offer = { $in: [false, true] };
+    }
+
+    // Get the furnished filter from the URL.
+    let furnished = req.query.furnished;
+
+    // If furnished is "undefined" or "false", allow both furnished and unfurnished listings.
+    if (furnished === undefined || furnished === "false") {
+      furnished = { $in: [false, true] };
+    }
+
+    // Get the parking filter from the URL.
+    let parking = req.query.parking;
+
+    // If parking is "undefined" or "false", allow both listings with and without parking.
+    if (parking === undefined || parking === "false") {
+      parking = { $in: [false, true] };
+    }
+
+    // Get the listing type from the URL.
+    let type = req.query.type;
+
+    // If no specific type is selected, allow both rent and sale listings.
+    if (type === undefined || type === "all") {
+      type = { $in: ["rent", "sale"] };
+    }
+
+    // Get the search text from the URL.
+    // If no search term is provided, use an empty string.
+    const searchTerm = req.query.searchTerm || "";
+
+    // Decide which field should be used for sorting.
+    // By default, listings are sorted by createdAt.
+    const sort = req.query.sort || "createdAt";
+
+    // Decide the sorting order.
+    // "desc" means newest/highest values first.
+    // "asc" means oldest/lowest values first.
+    const order = req.query.order || "desc";
+
+    // Find listings that match all the filters.
+    const listings = await Listing.find({
+      // Search the listing name.
+      // $regex allows partial text matching.
+      // $options: "i" makes the search case-insensitive.
+      name: {
+        $regex: searchTerm,
+        $options: "i",
+      },
+      // Apply the offer filter.
+      offer,
+      // Apply the furnished filter.
+      furnished,
+      // Apply the parking filter.
+      parking,
+      // Apply the rent/sale filter.
+      type,
+    })
+      // Sort the results using the selected field and order.
+      // Example: { createdAt: "desc" }
+      .sort({ [sort]: order })
+
+      // Return only the requested number of listings.
+      .limit(limit)
+
+      // Skip listings for pagination.
+      .skip(startIndex);
+
+    return res.status(200).json(listings);
+  } catch (err) {
+    next(err);
+  }
+};
