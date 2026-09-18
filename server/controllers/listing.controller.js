@@ -262,7 +262,17 @@ export const getListings = async (req, res, next) => {
       // Skip listings for pagination.
       .skip(startIndex);
 
-    return res.status(200).json(listings);
+    const listingsWithImageUrls = listings.map((listing) => {
+      const listingData = listing.toObject();
+
+      listingData.images = listing.images.map(
+        (_, imageIndex) => `/api/listing/${listing._id}/image/${imageIndex}`,
+      );
+
+      return listingData;
+    });
+
+    return res.status(200).json(listingsWithImageUrls);
   } catch (err) {
     next(err);
   }
