@@ -1,7 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { FaSearch } from "react-icons/fa";
-import { useState } from "react";
 
 const defaultAvatar = "/default-avatar.svg";
 
@@ -10,16 +9,11 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Get the search term from the current URL when the component first loads.
-  const [searchTerm, setSearchTerm] = useState(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-
-    return urlParams.get("searchTerm") || "";
-  });
-
   // Handle the search form submission.
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const searchTerm = e.currentTarget.elements.searchTerm.value;
 
     // Get the current query parameters from the URL.
     const urlParams = new URLSearchParams(location.search);
@@ -51,10 +45,15 @@ const Header = () => {
           className="bg-slate-100 p-1 rounded-lg flex items-center"
         >
           <input
+            key={location.pathname}
             type="text"
+            name="searchTerm"
             placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            defaultValue={
+              location.pathname === "/search"
+                ? new URLSearchParams(location.search).get("searchTerm") || ""
+                : ""
+            }
             className="bg-transparent focus:outline-none w-24 sm:w-64"
           />
 
