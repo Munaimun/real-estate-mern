@@ -2,14 +2,29 @@ import { Link } from "react-router-dom";
 import { MdLocationOn } from "react-icons/md";
 
 const ListingItem = ({ listing }) => {
+  const price = listing.offer ? listing.discountPrice : listing.regularPrice;
+  const savings = Number(listing.regularPrice) - Number(listing.discountPrice);
+
   return (
-    <div className="shadow-md hover:shadow-lg transition-shadow overflow-hidden rounded-lg gap-4 w-full sm:w-82.5">
+    <div className="relative w-full overflow-hidden rounded-lg shadow-md transition-shadow hover:shadow-lg sm:w-82.5">
       <Link to={`/listing/${listing._id}`}>
-        <img
-          src={listing.images?.[0]}
-          alt={listing.name}
-          className="w-full h-80 sm:h-55 object-cover hover:scale-105 transition-transform duration-200 ease-in-out"
-        />
+        <div className="relative overflow-hidden">
+          <img
+            src={listing.images?.[0]}
+            alt={listing.name}
+            className="h-80 w-full object-cover transition-transform duration-200 ease-in-out hover:scale-105 sm:h-55"
+          />
+          <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+            <span className="rounded-md bg-slate-800 px-2 py-1 text-xs font-semibold text-white">
+              {listing.type === "rent" ? "For Rent" : "For Sale"}
+            </span>
+            {listing.offer && (
+              <span className="rounded-md bg-emerald-600 px-2 py-1 text-xs font-semibold text-white">
+                Offer
+              </span>
+            )}
+          </div>
+        </div>
         <div className="p-3 flex flex-col gap-2 w-full">
           <p className="text-lg font-semibold text-slate-700 truncate">
             {listing.name}
@@ -23,13 +38,15 @@ const ListingItem = ({ listing }) => {
           <p className="text-sm text-gray-600 line-clamp-2">
             {listing.description}
           </p>
-          <p className="text-slate-500 font-semibold">
-            ${" "}
-            {listing.offer
-              ? listing.discountPrice.toLocaleString("en-US")
-              : listing.regularPrice.toLocaleString("en-US")}{" "}
+          <p className="text-lg font-semibold text-slate-700">
+            ${Number(price).toLocaleString("en-US")}{" "}
             {listing.type === "rent" && "/ month"}
           </p>
+          {listing.offer && savings > 0 && (
+            <p className="text-xs font-semibold text-emerald-700">
+              Save ${savings.toLocaleString("en-US")}
+            </p>
+          )}
           <div className="text-slate-700 flex gap-4">
             <div className="font-bold text-xs">
               {listing.bedrooms > 1 ? `${listing.bedrooms} beds` : "bed"}

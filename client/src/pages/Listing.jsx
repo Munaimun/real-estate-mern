@@ -28,6 +28,9 @@ const Listing = () => {
   const [copied, setCopied] = useState(false);
   const [contact, setContact] = useState(false);
   const params = useParams();
+  const savings = listing
+    ? Number(listing.regularPrice) - Number(listing.discountPrice)
+    : 0;
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -93,24 +96,24 @@ const Listing = () => {
             </p>
           )}
           <div className="flex flex-col max-w-4xl mx-auto p-3 my-7 gap-4">
-            <p className="text-2xl font-semibold">
+            <p className="text-2xl font-semibold text-slate-800">
               {listing.name} - ${" "}
-              {listing.offer
-                ? listing.discountPrice.toLocaleString("en-US")
-                : listing.regularPrice.toLocaleString("en-US")}
+              {Number(
+                listing.offer ? listing.discountPrice : listing.regularPrice,
+              ).toLocaleString("en-US")}
               {listing.type === "rent" && " / month"}
             </p>
             <p className="flex items-center mt-6 gap-2 text-slate-600 text-sm">
               <FaMapMarkerAlt className="text-green-700" />
               {listing.address}
             </p>
-            <div className="flex gap-4">
-              <p className="bg-red-900 w-full max-w-50 text-white text-center p-1 rounded-md">
+            <div className="flex flex-wrap gap-2">
+              <p className="w-fit rounded-md bg-slate-800 px-3 py-1 text-sm font-semibold text-white">
                 {listing.type === "rent" ? "For Rent" : "For Sale"}
               </p>
               {listing.offer && (
-                <p className="bg-green-900 w-full max-w-50 text-white text-center p-1 rounded-md">
-                  ${+listing.regularPrice - +listing.discountPrice} OFF
+                <p className="w-fit rounded-md bg-emerald-600 px-3 py-1 text-sm font-semibold text-white">
+                  Offer: Save ${savings.toLocaleString("en-US")}
                 </p>
               )}
             </div>
@@ -143,10 +146,21 @@ const Listing = () => {
             {currentUser && listing.userRef !== currentUser._id && !contact && (
               <button
                 onClick={() => setContact(true)}
-                className="bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 p-3"
+                className="rounded-lg bg-slate-700 p-3 font-semibold uppercase text-white transition hover:bg-slate-800"
               >
-                Contact Landlord
+                Contact landlord
               </button>
+            )}
+            {!currentUser && (
+              <p className="rounded-lg bg-slate-100 p-3 text-sm text-slate-600">
+                <a
+                  href="/sign-in"
+                  className="font-semibold text-blue-800 hover:underline"
+                >
+                  Sign in
+                </a>{" "}
+                to contact the landlord about this property.
+              </p>
             )}
             {contact && <Contact listing={listing} />}
           </div>

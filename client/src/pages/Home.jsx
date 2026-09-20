@@ -82,19 +82,27 @@ const Home = () => {
       </div>
 
       {/* swiper */}
-      <Swiper navigation>
+      <Swiper navigation className="bg-slate-100">
         {offerListings &&
           offerListings.length > 0 &&
           offerListings.map((listing) => (
             <SwiperSlide key={listing._id}>
-              <div
-                style={{
-                  background: `url(${listing.images[0]}) center no-repeat`,
-                  backgroundSize: "cover",
-                }}
-                className="h-125"
-                key={listing._id}
-              ></div>
+              <Link
+                to={`/listing/${listing._id}`}
+                className="group relative block"
+              >
+                <img
+                  src={listing.images?.[0]}
+                  alt={listing.name}
+                  className="h-125 w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent px-6 pb-7 pt-20 text-white">
+                  <p className="text-2xl font-semibold">{listing.name}</p>
+                  <p className="mt-1 text-sm text-slate-200">
+                    View property details -&gt;
+                  </p>
+                </div>
+              </Link>
             </SwiperSlide>
           ))}
       </Swiper>
