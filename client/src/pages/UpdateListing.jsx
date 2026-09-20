@@ -171,162 +171,198 @@ const UpdateListing = () => {
   };
 
   return (
-    <main className="p-3 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-semibold text-center mb-6">
+    <main className="mx-auto max-w-5xl px-4 py-8">
+      <h1 className="mb-8 text-center text-3xl font-semibold text-slate-800">
         Update a Listing
       </h1>
 
-      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-6">
+      <form
+        onSubmit={handleSubmit}
+        className="grid gap-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7 lg:grid-cols-2"
+      >
         {/* Left side - listing information */}
-        <div className="flex flex-col gap-2 flex-1">
+        <div className="flex flex-col gap-5">
           {/* Listing name */}
-          <input
-            name="name"
-            type="text"
-            placeholder="Name"
-            className="border p-3 rounded-lg"
-            maxLength="62"
-            minLength="10"
-            required
-            value={formData.name || ""}
-            onChange={handleChange}
-          />
+          <label className="text-sm font-medium text-slate-700">
+            Listing name
+            <input
+              name="name"
+              type="text"
+              placeholder="Name"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-white p-3 text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+              maxLength="62"
+              minLength="10"
+              required
+              value={formData.name || ""}
+              onChange={handleChange}
+            />
+          </label>
 
           {/* Listing description */}
-          <textarea
-            name="description"
-            placeholder="Description"
-            className="border p-3 rounded-lg"
-            required
-            value={formData.description || ""}
-            onChange={handleChange}
-          />
+          <label className="text-sm font-medium text-slate-700">
+            Description
+            <textarea
+              name="description"
+              placeholder="Describe the property"
+              className="mt-1 min-h-32 w-full resize-y rounded-lg border border-slate-300 bg-white p-3 text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+              required
+              value={formData.description || ""}
+              onChange={handleChange}
+            />
+          </label>
 
           {/* Listing address */}
-          <input
-            name="address"
-            type="text"
-            placeholder="Address"
-            className="border p-3 rounded-lg"
-            required
-            value={formData.address || ""}
-            onChange={handleChange}
-          />
+          <label className="text-sm font-medium text-slate-700">
+            Address
+            <input
+              name="address"
+              type="text"
+              placeholder="Property address"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-white p-3 text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+              required
+              value={formData.address || ""}
+              onChange={handleChange}
+            />
+          </label>
 
           {/* Listing type and options */}
-          <div className="flex gap-6 flex-wrap">
-            <label>
-              <input
-                name="type"
-                value="sale"
-                type="radio"
-                checked={formData.type === "sale"}
-                onChange={handleChange}
-                required
-              />{" "}
-              Sell
-            </label>
+          <fieldset className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <legend className="px-1 text-sm font-semibold text-slate-700">
+              Property details
+            </legend>
+            <div className="mt-2 grid gap-3 sm:grid-cols-2">
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                <input
+                  name="type"
+                  value="sale"
+                  type="radio"
+                  checked={formData.type === "sale"}
+                  onChange={handleChange}
+                  required
+                  className="h-4 w-4 accent-slate-700"
+                />{" "}
+                Sell
+              </label>
 
-            <label>
-              <input
-                name="type"
-                value="rent"
-                type="radio"
-                checked={formData.type === "rent"}
-                onChange={handleChange}
-              />{" "}
-              Rent
-            </label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                <input
+                  name="type"
+                  value="rent"
+                  type="radio"
+                  checked={formData.type === "rent"}
+                  onChange={handleChange}
+                  className="h-4 w-4 accent-slate-700"
+                />{" "}
+                Rent
+              </label>
 
-            <label>
-              <input
-                name="parking"
-                type="checkbox"
-                checked={Boolean(formData.parking)}
-                onChange={handleChange}
-              />{" "}
-              Parking Spot
-            </label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                <input
+                  name="parking"
+                  type="checkbox"
+                  checked={Boolean(formData.parking)}
+                  onChange={handleChange}
+                  className="h-4 w-4 rounded accent-slate-700"
+                />{" "}
+                Parking Spot
+              </label>
 
-            <label>
-              <input
-                name="furnished"
-                type="checkbox"
-                checked={Boolean(formData.furnished)}
-                onChange={handleChange}
-              />{" "}
-              Furnished
-            </label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                <input
+                  name="furnished"
+                  type="checkbox"
+                  checked={Boolean(formData.furnished)}
+                  onChange={handleChange}
+                  className="h-4 w-4 rounded accent-slate-700"
+                />{" "}
+                Furnished
+              </label>
 
-            <label>
-              <input
-                name="offer"
-                type="checkbox"
-                checked={Boolean(formData.offer)}
-                onChange={handleChange}
-              />{" "}
-              Offer
-            </label>
-          </div>
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                <input
+                  name="offer"
+                  type="checkbox"
+                  checked={Boolean(formData.offer)}
+                  onChange={handleChange}
+                  className="h-4 w-4 rounded accent-slate-700"
+                />{" "}
+                Offer
+              </label>
+            </div>
+          </fieldset>
 
           {/* Bedrooms, bathrooms and prices */}
-          <div className="flex flex-wrap gap-3">
-            <input
-              name="bedrooms"
-              type="number"
-              min="1"
-              max="10"
-              placeholder="Beds"
-              required
-              className="w-24 border rounded-lg p-2"
-              value={formData.bedrooms || ""}
-              onChange={handleChange}
-            />
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <label className="text-sm font-medium text-slate-700">
+              Bedrooms
+              <input
+                name="bedrooms"
+                type="number"
+                min="1"
+                max="10"
+                placeholder="0"
+                required
+                className="mt-1 w-full rounded-lg border border-slate-300 bg-white p-2.5 text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+                value={formData.bedrooms || ""}
+                onChange={handleChange}
+              />
+            </label>
 
-            <input
-              name="bathrooms"
-              type="number"
-              min="1"
-              max="10"
-              placeholder="Baths"
-              required
-              className="w-24 border rounded-lg p-2"
-              value={formData.bathrooms || ""}
-              onChange={handleChange}
-            />
+            <label className="text-sm font-medium text-slate-700">
+              Bathrooms
+              <input
+                name="bathrooms"
+                type="number"
+                min="1"
+                max="10"
+                placeholder="0"
+                required
+                className="mt-1 w-full rounded-lg border border-slate-300 bg-white p-2.5 text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+                value={formData.bathrooms || ""}
+                onChange={handleChange}
+              />
+            </label>
 
-            <input
-              name="regularPrice"
-              type="number"
-              min="1"
-              placeholder="Regular price"
-              required
-              className="border rounded-lg p-2"
-              value={formData.regularPrice || ""}
-              onChange={handleChange}
-            />
+            <label className="text-sm font-medium text-slate-700">
+              Regular price
+              <input
+                name="regularPrice"
+                type="number"
+                min="1"
+                placeholder="Regular price"
+                required
+                className="mt-1 w-full rounded-lg border border-slate-300 bg-white p-2.5 text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+                value={formData.regularPrice || ""}
+                onChange={handleChange}
+              />
+            </label>
 
-            <input
-              name="discountPrice"
-              type="number"
-              min="1"
-              placeholder="Discount price"
-              required
-              className="border rounded-lg p-2"
-              value={formData.discountPrice || ""}
-              onChange={handleChange}
-            />
+            <label className="text-sm font-medium text-slate-700">
+              Discount price
+              <input
+                name="discountPrice"
+                type="number"
+                min="1"
+                placeholder="Discount price"
+                required
+                className="mt-1 w-full rounded-lg border border-slate-300 bg-white p-2.5 text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+                value={formData.discountPrice || ""}
+                onChange={handleChange}
+              />
+            </label>
           </div>
         </div>
 
         {/* Right side - images */}
-        <div className="flex flex-col flex-1 gap-4">
-          <p className="font-semibold">
-            Images:{" "}
-            <span className="font-normal text-gray-700">
-              select new images to replace the old ones (max 6)
-            </span>
-          </p>
+        <div className="flex flex-col gap-5">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-800">
+              Property images
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Select new images to replace the existing ones. Maximum 6 images.
+            </p>
+          </div>
 
           {/* Select new images */}
           <input
@@ -334,18 +370,18 @@ const UpdateListing = () => {
             type="file"
             accept="image/*"
             multiple
-            className="p-3 border border-gray-300 rounded w-full"
+            className="w-full cursor-pointer rounded-lg border border-slate-300 bg-slate-50 text-sm text-slate-600 file:mr-4 file:cursor-pointer file:border-0 file:bg-slate-700 file:px-4 file:py-3 file:font-medium file:text-white hover:file:bg-slate-800"
           />
 
           {/* Show newly selected image previews */}
           {imagePreviews.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {imagePreviews.map((preview, index) => (
                 <div key={`${preview.name}-${index}`} className="relative">
                   <img
                     src={preview.url}
                     alt={`Listing preview ${index + 1}`}
-                    className="h-28 w-full rounded-lg object-cover border"
+                    className="h-32 w-full rounded-lg border border-slate-200 object-cover shadow-sm"
                   />
 
                   {/* The first image becomes the cover image. */}
@@ -361,13 +397,13 @@ const UpdateListing = () => {
 
           {/* Show existing images when no new images are selected */}
           {!imagePreviews.length && formData.images?.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {formData.images.map((image, index) => (
                 <div key={index} className="relative">
                   <img
                     src={`/api/listing/${formData._id}/image/${index}`}
                     alt={`Existing listing image ${index + 1}`}
-                    className="h-28 w-full rounded-lg object-cover border"
+                    className="h-32 w-full rounded-lg border border-slate-200 object-cover shadow-sm"
                   />
 
                   {/* The first existing image is the cover image. */}
@@ -384,7 +420,7 @@ const UpdateListing = () => {
           {/* Update button */}
           <button
             disabled={loading}
-            className="p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
+            className="mt-auto w-full rounded-lg bg-slate-700 p-3 font-semibold uppercase tracking-wide text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "Updating..." : "Update Listing"}
           </button>
