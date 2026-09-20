@@ -5,6 +5,7 @@ import ListingItem from "../components/ListingItem";
 const Search = () => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showMore, setShowMore] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -38,9 +39,11 @@ const Search = () => {
         }
 
         setListings(data);
+        setShowMore(data.length >= 9);
       } catch (error) {
         console.error(error);
         setListings([]);
+        setShowMore(false);
       } finally {
         setLoading(false);
       }
@@ -112,6 +115,21 @@ const Search = () => {
 
     // Navigate to the search page with the filters.
     navigate(`/search?${searchQuery}`);
+  };
+
+  const onShowMoreClick = async () => {
+    const numOfListings = listings.length;
+    const startIndex = numOfListings;
+    const urlParams = new URLSearchParams(location.search);
+    urlParams.set("startIndex", startIndex);
+    const searchQuery = urlParams.toString();
+
+    const res = await fetch(`/api/listing/get?${searchQuery}`);
+    const data = await res.json();
+
+    if (data.length < 9) setShowMore(false);
+
+    setListings([...listings, ...data]);
   };
 
   return (
@@ -265,6 +283,14 @@ const Search = () => {
             listings.map((listing) => (
               <ListingItem key={listing._id} listing={listing} />
             ))}
+          {showMore && (
+            <button
+              className="text-green-700 hover:underline p-5 text-center w-full"
+              onClick={onShowMoreClick}
+            >
+              Show more
+            </button>
+          )}
         </div>
       </div>
     </div>
