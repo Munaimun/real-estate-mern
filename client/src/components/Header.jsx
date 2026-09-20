@@ -30,10 +30,10 @@ const Header = () => {
 
   return (
     <header className="bg-slate-200 shadow-md">
-      <div className="flex justify-between items-center max-w-6xl mx-auto p-3">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 p-3 sm:gap-4">
         {/* Logo */}
         <Link to="/">
-          <h1 className="font-bold text-sm sm:text-xl flex flex-wrap">
+          <h1 className="flex flex-wrap text-sm font-bold sm:text-xl">
             <span className="text-slate-500">Real</span>
             <span className="text-slate-700">Estate</span>
           </h1>
@@ -42,7 +42,7 @@ const Header = () => {
         {/* Search bar */}
         <form
           onSubmit={handleSubmit}
-          className="bg-slate-100 p-1 rounded-lg flex items-center"
+          className="flex shrink items-center rounded-lg bg-slate-100 p-1"
         >
           <input
             key={location.pathname}
@@ -54,7 +54,7 @@ const Header = () => {
                 ? new URLSearchParams(location.search).get("searchTerm") || ""
                 : ""
             }
-            className="bg-transparent focus:outline-none w-24 sm:w-64"
+            className="w-20 bg-transparent text-sm focus:outline-none sm:w-64"
           />
 
           <button type="submit">
@@ -63,19 +63,15 @@ const Header = () => {
         </form>
 
         {/* Header navigation */}
-        <ul className="flex gap-4 cursor-pointer">
+        <ul className="flex shrink-0 cursor-pointer items-center gap-2 text-xs sm:gap-4 sm:text-sm">
           {/* Home link */}
           <Link to="/">
-            <li className="hidden sm:inline text-slate-700 hover:underline">
-              Home
-            </li>
+            <li className="text-slate-700 hover:underline">Home</li>
           </Link>
 
           {/* About link */}
           <Link to="/about">
-            <li className="hidden sm:inline text-slate-700 hover:underline">
-              About
-            </li>
+            <li className="text-slate-700 hover:underline">About</li>
           </Link>
 
           {/* Profile / Sign in link */}
