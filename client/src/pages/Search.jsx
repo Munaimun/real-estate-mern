@@ -117,18 +117,36 @@ const Search = () => {
     navigate(`/search?${searchQuery}`);
   };
 
+  // This function loads more listings when the user clicks "Show more".
   const onShowMoreClick = async () => {
+    // Get the number of listings that are already displayed.
     const numOfListings = listings.length;
+
+    // Use the current number of listings as the starting index, this tells the backend to skip the listings we already have.
     const startIndex = numOfListings;
+
+    // Get the current search/filter parameters from the URL, this keeps the same search, type, parking, sorting, etc.
     const urlParams = new URLSearchParams(location.search);
+
+    // Add the startIndex to the URL, example: startIndex=9 means skip the first 9 listings.
     urlParams.set("startIndex", startIndex);
+
+    // Convert all URL parameters into a query string.
     const searchQuery = urlParams.toString();
 
+    // Ask the backend for the next group of listings.
     const res = await fetch(`/api/listing/get?${searchQuery}`);
+
     const data = await res.json();
 
-    if (data.length < 9) setShowMore(false);
+    // If fewer than 9 listings were returned, there are no more listings to load.
+    if (data.length < 9) {
+      setShowMore(false);
+    }
 
+    // Add the new listings to the existing listings.
+    // We use ...listings to keep the old listings
+    // and ...data to add the new listings after them.
     setListings([...listings, ...data]);
   };
 
