@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import ListingItem from "../components/ListingItem";
 
 const Search = () => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [showMore, setShowMore] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -27,7 +27,6 @@ const Search = () => {
   useEffect(() => {
     const fetchListings = async () => {
       setLoading(true);
-      setShowMore(false);
 
       try {
         const urlParams = new URLSearchParams(location.search);
@@ -39,7 +38,6 @@ const Search = () => {
         }
 
         setListings(data);
-        setShowMore(data.length > 8);
       } catch (error) {
         console.error(error);
         setListings([]);
@@ -50,30 +48,6 @@ const Search = () => {
 
     fetchListings();
   }, [location.search]);
-
-  const handleShowMore = async () => {
-    setLoading(true);
-
-    try {
-      const urlParams = new URLSearchParams(location.search);
-      urlParams.set("startIndex", listings.length);
-      urlParams.set("limit", "9");
-
-      const res = await fetch(`/api/listing/get?${urlParams.toString()}`);
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to fetch more listings");
-      }
-
-      setListings((currentListings) => [...currentListings, ...data]);
-      setShowMore(data.length === 9);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Handle changes to the search/filter inputs.
   const handleChange = (e) => {
@@ -271,35 +245,27 @@ const Search = () => {
       </div>
 
       {/* Right side = search results */}
-      <div>
+      <div className="flex-1">
         <h1 className="text-3xl font-semibold p-3 text-slate-700 sm:mt-2 mt-0">
           Listing Results:
         </h1>
 
-        {loading && <p className="p-3 text-slate-600">Loading...</p>}
+        <div className="p-7 flex flex-wrap gap-4">
+          {!loading && listings.length === 0 && (
+            <p className="text-xl text-slate-700">No listings found.</p>
+          )}
+          {loading && (
+            <p className="text-xl text-slate-700 text-center x-full">
+              Loading...
+            </p>
+          )}
 
-        {!loading && listings.length === 0 && (
-          <p className="p-3 text-slate-600">No listings found.</p>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 p-3">
-          {listings.map((listing) => (
-            <div key={listing._id} className="border rounded-lg p-4">
-              <h2 className="font-semibold text-slate-700">{listing.name}</h2>
-              <p className="text-slate-600">{listing.address}</p>
-            </div>
-          ))}
+          {!loading &&
+            listings &&
+            listings.map((listing) => (
+              <ListingItem key={listing._id} listing={listing} />
+            ))}
         </div>
-
-        {showMore && (
-          <button
-            type="button"
-            onClick={handleShowMore}
-            className="p-3 text-blue-700 hover:underline"
-          >
-            Show more
-          </button>
-        )}
       </div>
     </div>
   );
